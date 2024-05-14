@@ -1,36 +1,89 @@
+using Unity.Collections;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public class InputManager : MonoBehaviour
 {
+    private static InputManager _instance;
+
+    public static InputManager Instance => _instance;
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            _instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+        
+    }
+
     public string moveActionName = "Move";
-    public Vector2 moveValue;
+    [SerializeField, ReadOnly]
+    private Vector2 moveValue;
+    public Vector2 MoveValue => moveValue;
 
     public string jumpActionName = "Jump";
-    public bool jumpValue;
+    [SerializeField, ReadOnly]
+    private bool jumpValue;
+    public bool JumpValue => jumpValue;
 
-    private InputAction moveAction;
-    private InputAction jumpAction;
+    public string lookActionName = "Look";
+    [SerializeField, ReadOnly]
+    private Vector2 lookValue;
+    public Vector2 LookValue => lookValue;
+
+    public string cancelActionName = "Cancel";
+    [SerializeField, ReadOnly]
+    private bool cancelValue;
+    public bool CancelValue => cancelValue;
+
+    private InputAction _moveAction;
+    private InputAction _jumpAction;
+    private InputAction _lookAction;
+    private InputAction _cancelAction;
     
     void Start()
     {
-        moveAction = InputSystem.actions.FindAction(moveActionName);
-        jumpAction = InputSystem.actions.FindAction(jumpActionName);
+        _moveAction = InputSystem.actions.FindAction(moveActionName);
+        _jumpAction = InputSystem.actions.FindAction(jumpActionName);
+        _lookAction = InputSystem.actions.FindAction(lookActionName);
+        _cancelAction = InputSystem.actions.FindAction(cancelActionName);
     }
 
     void Update()
     {
         GetMoveValue();
         GetJumpValue();
+        GetLookValue();
+        GetCancelValue();
     }
 
-    public void GetMoveValue()
+    private void GetMoveValue()
     {
-        moveValue = moveAction.ReadValue<Vector2>();
+        moveValue = _moveAction.ReadValue<Vector2>();
     }
 
-    public void GetJumpValue()
+    private void GetJumpValue()
     {
-        jumpValue = jumpAction.ReadValue<float>() > 0;
+        jumpValue = _jumpAction.ReadValue<float>() > 0;
+    }
+
+    private void GetLookValue()
+    {
+        lookValue = _lookAction.ReadValue<Vector2>();
+    }
+
+    private void GetCancelValue()
+    {
+        cancelValue = _cancelAction.ReadValue<float>() > 0;
+    }
+
+    public bool CancelButtonPressed()
+    {
+        return _cancelAction.WasPressedThisFrame();
     }
 }
