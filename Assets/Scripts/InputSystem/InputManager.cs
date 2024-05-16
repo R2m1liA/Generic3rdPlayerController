@@ -41,10 +41,16 @@ public class InputManager : MonoBehaviour
     private bool cancelValue;
     public bool CancelValue => cancelValue;
 
+    public string sprintActionName = "Sprint";
+    [SerializeField, ReadOnly]
+    private bool sprintValue;
+    public bool SprintValue => sprintValue;
+
     private InputAction _moveAction;
     private InputAction _jumpAction;
     private InputAction _lookAction;
     private InputAction _cancelAction;
+    private InputAction _sprintAction;
     
     void Start()
     {
@@ -52,6 +58,7 @@ public class InputManager : MonoBehaviour
         _jumpAction = InputSystem.actions.FindAction(jumpActionName);
         _lookAction = InputSystem.actions.FindAction(lookActionName);
         _cancelAction = InputSystem.actions.FindAction(cancelActionName);
+        _sprintAction = InputSystem.actions.FindAction(sprintActionName);
     }
 
     void Update()
@@ -60,6 +67,7 @@ public class InputManager : MonoBehaviour
         GetJumpValue();
         GetLookValue();
         GetCancelValue();
+        GetSprintValue();
     }
 
     private void GetMoveValue()
@@ -85,5 +93,10 @@ public class InputManager : MonoBehaviour
     public bool CancelButtonPressed()
     {
         return _cancelAction.WasPressedThisFrame();
+    }
+
+    private void GetSprintValue()
+    {
+        sprintValue = _sprintAction.ReadValue<float>() > 0;
     }
 }
