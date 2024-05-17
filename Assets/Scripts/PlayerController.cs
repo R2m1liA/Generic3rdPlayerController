@@ -8,6 +8,11 @@ public class PlayerController : MonoBehaviour
     public float sprintSpeed = 10.0f;
     public float speedChangeRate = 10.0f;
     public float rotationSmoothTime = 0.12f;
+    [Header("Jump Settings")]
+    public bool grounded = true;
+    public float groundCheckOffset = -0.15f;
+    public float groundCheckRadius = 0.2f;
+    public LayerMask groundLayer;
 
     [Header("Camera Settings")]
     public GameObject freeLookCamera;
@@ -31,6 +36,7 @@ public class PlayerController : MonoBehaviour
     // Animator IDs
     private int _animIDSpeed;
     private int _animIDMotionSpeed;
+    private int _animIDGrounded;
 
     private CinemachineOrbitalFollow _orbitalFollow;
     private Rigidbody _rigidbody;
@@ -62,6 +68,7 @@ public class PlayerController : MonoBehaviour
 
     private void FixedUpdate()
     {
+        GroundCheck();
         Move();
     }
 
@@ -145,13 +152,25 @@ public class PlayerController : MonoBehaviour
                 _animator.SetFloat(_animIDMotionSpeed, 1.0f);
             }
         }
-        
+    }
+
+    private void GroundCheck()
+    {
+        // Set sphere position
+        Vector3 spherePosition = new Vector3(transform.position.x, transform.position.y - groundCheckOffset, transform.position.z);
+        grounded = Physics.CheckSphere(spherePosition, groundCheckRadius, groundLayer, QueryTriggerInteraction.Ignore);
+
+        if(_animator)
+        {
+            _animator.SetBool(_animIDGrounded, grounded);
+        }
     }
 
     private void AssignAnimationIDs()
     {
         _animIDSpeed = Animator.StringToHash(speedParameter);
         _animIDMotionSpeed = Animator.StringToHash(motionSpeedParameter);
+        _animIDGrounded = Animator.StringToHash("Grounded");
     }
     
     public void LockCursor()
@@ -164,5 +183,17 @@ public class PlayerController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        // Draw ground check sphere
+        Color transparentGreen = new Color(0.0f, 1.0f, 0.0f, 0.35f);
+        Color transparentRed = new Color(1.0f, 0.0f, 0.0f, 0.35f);
+
+        if(grounded) Gizmos.color = transparentGreen;
+        else Gizmos.color = transparentRed;
+
+        Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - groundCheckOffset, transform.position.z), groundCheckRadius);
     }
 }
