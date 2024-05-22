@@ -25,6 +25,10 @@ public class PlayerController : MonoBehaviour
     [Header("Animator Setting")]
     public string speedParameter = "Speed";
     public string motionSpeedParameter = "MotionSpeed";
+    
+    [Header("Sound Settings")]
+    public AudioClip[] footstepSounds;
+    public AudioClip landingSound;
 
     // Player movement variables
     private float _speed;
@@ -64,12 +68,13 @@ public class PlayerController : MonoBehaviour
                 LockCursor();
             }
         }
+        GroundCheck();
+        Move();
     }
 
     private void FixedUpdate()
     {
-        GroundCheck();
-        Move();
+        
     }
 
     private void LateUpdate()
@@ -183,6 +188,28 @@ public class PlayerController : MonoBehaviour
     {
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+    }
+
+    // 对应Animator中的OnFootStep事件
+    public void OnFootstep(AnimationEvent animationEvent)
+    {
+        if (animationEvent.animatorClipInfo.weight > 0.5)
+        {
+            if (footstepSounds.Length > 0)
+            {
+                int randomIndex = Random.Range(0, footstepSounds.Length);
+                AudioSource.PlayClipAtPoint(footstepSounds[randomIndex], transform.position);
+            }
+        }
+    }
+
+    // 对应Animator中的OnLand事件
+    public void OnLand(AnimationEvent animationEvent)
+    {
+        if (animationEvent.animatorClipInfo.weight > 0.5)
+        {
+            AudioSource.PlayClipAtPoint(landingSound, transform.position);
+        }
     }
 
     private void OnDrawGizmosSelected()
